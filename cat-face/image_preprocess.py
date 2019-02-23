@@ -102,66 +102,72 @@ def regularize_data(folder, folder_save):
     print('runtime = ', time.clock() - t_start)
 
 
-def preprocess(traindata=False, testdata=False):
+def preprocess(traindata=False, testdata=False, detect=False, grayscale=False, organize=False):
     '''
     folders are in relative path
     '''
     t_start_all = time.clock()
     if traindata:
-        print('===============Preprocessing train data==================')
+        if detect:
+            print('===============Preprocessing train data==================')
 
-        # detect catface
-        print('---------------Detecting---------------')
-        folder = os.path.abspath(
-            '..') + r'\petfinder-adoption-prediction\train_images'
-        folder_save = os.path.abspath('.') + '\\data'
+            # detect catface
+            print('---------------Detecting---------------')
+            folder = os.path.abspath(
+                '..') + r'\petfinder-adoption-prediction\train_images'
+            folder_save = os.path.abspath('.') + '\\data'
 
-        catface_generate(folder, folder_save)
+            catface_generate(folder, folder_save)
 
-        time.sleep(1)
-        # grayscale and normalize
-        print('--------------Normalizing--------------')
-        folder = os.path.abspath('.') + '\\data'
-        folder_save = os.path.abspath('.') + '\\data_regularize_hist'
+            time.sleep(1)
+        if grayscale:
+            # grayscale and normalize
+            print('--------------Normalizing--------------')
+            folder = os.path.abspath('.') + '\\data'
+            folder_save = os.path.abspath('.') + '\\data_regularize_hist'
 
-        grayhist_generate(folder,folder_save)
+            grayhist_generate(folder,folder_save)
 
-        time.sleep(1)
-        # remove redundancy
-        print('---------------Removing---------------')
-        folder = os.path.abspath('.') + '\\data_regularize_hist'
-        folder_save = os.path.abspath('.') + '\\data_organized_hist'
+            time.sleep(1)
+        if organize:
+            # remove redundancy
+            print('--------------Organizing---------------')
+            folder = os.path.abspath('.') + '\\data_regularize_hist'
+            folder_save = os.path.abspath('.') + '\\data_organized_hist'
 
-        regularize_data(folder, folder_save)
-        time.sleep(1)
+            regularize_data(folder, folder_save)
+            time.sleep(1)
     if testdata:
-        print('===============Preprocessing test data==================')
-        # detect catface
-        print('---------------Detecting---------------')
-        folder = os.path.abspath(
-            '..') + r'\petfinder-adoption-prediction\test_images'
-        folder_save = os.path.abspath('.') + '\\testdata'
+        if detect:
+            print('===============Preprocessing test data==================')
+            # detect catface
+            print('---------------Detecting---------------')
+            folder = os.path.abspath(
+                '..') + r'\petfinder-adoption-prediction\test_images'
+            folder_save = os.path.abspath('.') + '\\testdata'
 
-        catface_generate(folder, folder_save)
+            catface_generate(folder, folder_save)
 
-        time.sleep(1)
-        # grayscale and normalize
-        print('--------------Normalizing--------------')
-        folder = os.path.abspath('.') + '\\testdata'
-        folder_save = os.path.abspath('.') + '\\testdata_regularize_hist'
+            time.sleep(1)
+        if grayscale:
+            # grayscale and normalize
+            print('--------------Normalizing--------------')
+            folder = os.path.abspath('.') + '\\testdata'
+            folder_save = os.path.abspath('.') + '\\testdata_regularize_hist'
 
-        grayhist_generate(folder,folder_save)
+            grayhist_generate(folder,folder_save)
 
-        time.sleep(1)
-        # remove redundancy
-        print('---------------Removing---------------')
-        folder = os.path.abspath('.') + '\\testdata_regularize_hist'
-        folder_save = os.path.abspath('.') + '\\testdata_organized_hist'
+            time.sleep(1)
+        if organize:
+            # remove redundancy
+            print('--------------Organizing---------------')
+            folder = os.path.abspath('.') + '\\testdata_regularize_hist'
+            folder_save = os.path.abspath('.') + '\\testdata_organized_hist'
 
-        regularize_data(folder, folder_save)
-        time.sleep(1)
+            regularize_data(folder, folder_save)
+            time.sleep(1)
     print('preprocess finish')
     print('runtime = ', time.clock() - t_start_all)
 
 if __name__ == '__main__':
-    preprocess(traindata=True, testdata=True)
+    preprocess(traindata=True, testdata=False, organize=True)

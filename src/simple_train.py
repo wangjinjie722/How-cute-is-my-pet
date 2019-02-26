@@ -5,7 +5,6 @@ Created on Thu Feb 14 22:42:25 2019
 
 @author: liyufei
 """
-
 import csv
 import torch
 import torch.nn as nn
@@ -13,28 +12,31 @@ import numpy as np
 from torch.autograd import Variable
 import spacy
 from collections import Counter
+import characters
+import tensor2np
 
 
-with open('/users/wangkai/Downloads/271project/train.csv',encoding='ISO-8859-1') as csvfile:
+with open('/Users/wangkai/Downloads/271Project/train.csv',encoding='ISO-8859-1') as csvfile:
     reader=csv.reader(csvfile)
-    description=[row[20] for row in reader]                 #all the description of pets 
+    description=[row[20] for row in reader]                 #all the description of pets
 description = description[1:]
+
 
 #with open('/Users/liyufei/Desktop/train_description.txt', 'wb') as f:
 #    for item in description:
- #       line = item +'\n'
+#        line = item +'\n'
 #        f.write(line.encode('utf-8'))
-        
-with open('/users/wangkai/Downloads/271project/train.csv',encoding='utf-8') as csvfile:
+
+with open('/Users/wangkai/Downloads/271Project/train.csv',encoding='utf-8') as csvfile:
     reader=csv.reader(csvfile)
-    label=[row[23] for row in reader]                 #all the description of pets 
+    label=[row[23] for row in reader]                 #all the description of pets
 label = np.array(label)
 label = label[1:]
 #with open('/Users/liyufei/Desktop/train_label.txt', 'wb') as f:
- #   for item in label:
- #       line = item +'\n'
- #       f.write(line.encode('utf-8'))
-        
+#    for item in label:
+#        line = item +'\n'
+#        f.write(line.encode('utf-8'))
+
 adj_list = []
 nlp = spacy.load('en')
 for row in description:
@@ -75,7 +77,7 @@ for row in description:
 #    po = len(description_vector[i])
 #    if po != 0:
 #        onehot_des[i-1][po-1] = 1
-    
+
 # threshold fetching words
 threshold = 4
 des_tensor = []
@@ -84,29 +86,43 @@ for i in description_vector:
         des_tensor.append(i)
     else:
         des_tensor.append(i[:4])
-        
-#train word with batch learning
-def BatchLearning(eta,iteration,class_number,train_imgs,train_labels):
-    train_imgs = np.array(train_imgs)
-    [row,col] = train_imgs.shape
-    train_imgs = np.column_stack((train_imgs,np.ones((row,1)))) #give bias
-    train_labels_regular = np.zeros((row,class_number))
-    for i in range(row):
-        j = train_labels[i]
-        train_labels_regular[i,int(float(j))] = 1 #regular t
-    #initialize w
-    mean = np.zeros((1,col+1))
-    cov = np.eye(col+1)
-    w = np.random.multivariate_normal(mean[0],cov,class_number)
-    for i in range(iteration):
-        a = w.dot(train_imgs.T)
-        y = np.exp(a)/np.sum(np.exp(a),axis = 0)
-        E_w = (train_labels_regular.T - y).dot(train_imgs)
-        w += eta * E_w
-    train_vector = train_imgs.dot(w.T)
-    return w,train_vector
 
-eta = 1.0e-3
-iteration = 5000
-class_number = 5
+
 #[w,train_vector] = BatchLearning(eta,iteration,class_number,des_tensor,label)
+
+other_labels = characters('/Users/wangkai/Downloads/271Project/train.csv') # numpy
+
+labels1 = other_labels[0]
+labels1 = np.array(labels1)
+labels_ID = other_labels[1]
+other_vector = []
+for j in range(16):
+    labels = labels1[:,j]
+    embeds = nn.Embedding(len(labels), 64)  #  words in vocab, 64 dimensional embeddings
+    other_vector.append([])
+    for i in range(len(labels)):
+        idx = torch.LongTensor([i])
+        idx = Variable(idx)
+        idx_embed = embeds(idx)
+        other_vector[j].append(idx_embed)
+
+npath = '/Users/wangkai/Downloads/271Project/train.csv'
+
+other = np.load(npath)
+
+other = other.T
+
+nother = np.zeros((14993,16,64))
+
+for i in range(16):
+
+    nother[:,i,:] = tensor2np(other[:,i].T,1)
+
+    others = nother.reshape(14993, 16 * 64)  #
+
+description_res = tensor2np(des_tensor,4)
+otherlabels_res = others
+np.save("description_res.npy", description_res);
+np.save("otherlabels_res.npy", otherlabels_res);
+
+

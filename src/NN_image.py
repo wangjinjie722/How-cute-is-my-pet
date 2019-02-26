@@ -18,7 +18,7 @@ from __future__ import print_function
 import argparse
 import os
 os.chdir("/users/wangkai/Downloads/271project/")
-
+from simple_train import *
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -71,6 +71,7 @@ def train(model, device, train_loader, optimizer, epoch):
     return features_64
 
 def test(model, device, test_loader):
+
     model.eval()
     test_loss = 0
     correct = 0
@@ -99,7 +100,7 @@ def test(model, device, test_loader):
         100. * correct / len(test_loader.dataset)))
     
     return features_64
-   
+
     
 class PetDataset(Dataset):
     """ img: 128*128, label: 0~5 """
@@ -122,9 +123,9 @@ class PetDataset(Dataset):
         
         
 def img_64(EPOCH = 10, LR=0.1, Momentum=0.5, no_cuda=False, save_model=False):
-    train_path = "/users/wangkai/Downloads/271project/train.csv"
+    train_path = "/train.csv"
 #    test_path = "petfinder-adoption-prediction/test.csv"
-    train_img_path = "/users/wangkai/Downloads/271project/data_organized_hist"
+    train_img_path = "/data_organized_hist"
 #    test_img_path = "testdata_organized_hist/"
     
     use_cuda = not no_cuda and torch.cuda.is_available()
@@ -132,10 +133,13 @@ def img_64(EPOCH = 10, LR=0.1, Momentum=0.5, no_cuda=False, save_model=False):
     kwargs = {'num_workers': 0, 'pin_memory': True} if use_cuda else {}
     
     X, petid, Y = characters(train_path) # load data
+
     train_label = Y[0:10000]
     test_label = Y[10000:14993]
     
-    IMG = imageread(petid, train_img_path)
+    #IMG = imageread(petid, train_img_path)
+
+    IMG =
     train_img = IMG[0:10000,:,:]
     test_img = IMG[10000:14993,:,:]
     

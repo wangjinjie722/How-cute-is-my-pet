@@ -53,7 +53,7 @@ def get_data(path):
 
 
 def main(args):
-    train_path = "/users/wangkai/Downloads/271project/train.csv"
+    train_path = "/train.csv"
 #    test_path = "petfinder-adoption-prediction/test.csv"
     
 #    SVM

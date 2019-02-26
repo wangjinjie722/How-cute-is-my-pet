@@ -36,4 +36,5 @@ def characters(path):
     umdata = ndata.values
     labels = raw[index[-1]].values
     data = normalize(umdata)
+
     return data, petid, labels

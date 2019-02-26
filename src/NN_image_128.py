@@ -17,7 +17,7 @@ Resnet18: image to 64 dim vector
 from __future__ import print_function
 import argparse
 import os
-os.chdir("Z://00_UCSD/ECE 271B/Project/") 
+os.chdir("/users/wangkai/Downloads/271project/")
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -12,12 +12,17 @@ import numpy as np
 from torch.autograd import Variable
 import spacy
 from collections import Counter
+import characters
+import tensor2np
+
+from tqdm import tqdm
 
 dir_path = '../data/train.csv'
+npy_path = '../data/other_vector.npy'
 
 with open(dir_path,encoding='ISO-8859-1') as csvfile:
     reader=csv.reader(csvfile)
-    description=[row[20] for row in reader]                 #all the description of pets 
+    description=[row[20] for row in reader]                 #all the description of pets
 description = description[1:]
 
 
@@ -25,17 +30,22 @@ description = description[1:]
 #    for item in description:
 #        line = item +'\n'
 #        f.write(line.encode('utf-8'))
-        
+
 with open(dir_path,encoding='utf-8') as csvfile:
     reader=csv.reader(csvfile)
-    label=[row[23] for row in reader]                 #all the description of pets 
+    label=[row[23] for row in reader]                 #all the description of pets
 label = np.array(label)
 label = label[1:]
 #with open('/Users/liyufei/Desktop/train_label.txt', 'wb') as f:
 #    for item in label:
 #        line = item +'\n'
 #        f.write(line.encode('utf-8'))
-        
+
+'''checkpoint'''
+print('data loaded')
+
+pbar = tqdm(total=len(description))
+
 adj_list = []
 nlp = spacy.load('en')
 for row in description:
@@ -43,8 +53,13 @@ for row in description:
     for token in doc:
         if token.pos_ == 'ADJ':
             adj_list.append(token.text)
+    pbar.update(1)
+pbar.close()
 
 common_word = Counter(adj_list).most_common(200)
+
+'''checkpoint'''
+print('adj_list got')
 
 positive_word = []
 for row in common_word:
@@ -59,7 +74,12 @@ for i in range(len(positive_word)):
     idx_embed = embeds(idx)
     word_vector.append(idx_embed)
 
+'''checkpoint'''
+print('positive word got')
+
 ##find positive in description
+pbar = tqdm(total=len(description))
+    
 description_vector = []
 for row in description:
     doc = nlp(row)
@@ -69,14 +89,18 @@ for row in description:
             j = positive_word.index(str(token))
             row_vector.append(word_vector[j])
     description_vector.append(row_vector)
+    pbar.update(1)
+pbar.close()
 
+'''checkpoint'''
+print('positive description got')
 #1.1 one_hot method
 #onehot_des = np.zeros((14993,64))
 #for i in range(1,len(description_vector)):
 #    po = len(description_vector[i])
 #    if po != 0:
 #        onehot_des[i-1][po-1] = 1
-    
+
 # threshold fetching words
 threshold = 4
 des_tensor = []
@@ -85,34 +109,12 @@ for i in description_vector:
         des_tensor.append(i)
     else:
         des_tensor.append(i[:4])
-        
-#train word with batch learning
-def BatchLearning(eta,iteration,class_number,train_imgs,train_labels):
-    train_imgs = np.array(train_imgs)
-    [row,col] = train_imgs.shape
-    train_imgs = np.column_stack((train_imgs,np.ones((row,1)))) #give bias
-    train_labels_regular = np.zeros((row,class_number))
-    for i in range(row):
-        j = train_labels[i]
-        train_labels_regular[i,int(float(j))] = 1 #regular t
-    #initialize w
-    mean = np.zeros((1,col+1))
-    cov = np.eye(col+1)
-    w = np.random.multivariate_normal(mean[0],cov,class_number)
-    for i in range(iteration):
-        a = w.dot(train_imgs.T)
-        y = np.exp(a)/np.sum(np.exp(a),axis = 0)
-        E_w = (train_labels_regular.T - y).dot(train_imgs)
-        w += eta * E_w
-    train_vector = train_imgs.dot(w.T)
-    return w,train_vector
 
-eta = 1.0e-3
-iteration = 5000
-class_number = 5
+
 #[w,train_vector] = BatchLearning(eta,iteration,class_number,des_tensor,label)
-      
-other_labels = characters(dir_path)
+
+other_labels = characters(dir_path) # numpy
+
 labels1 = other_labels[0]
 labels1 = np.array(labels1)
 labels_ID = other_labels[1]
@@ -126,3 +128,22 @@ for j in range(16):
         idx = Variable(idx)
         idx_embed = embeds(idx)
         other_vector[j].append(idx_embed)
+
+# TODO: save
+other = np.load(npy_path)
+
+other = other.T
+
+nother = np.zeros((14993,16,64))
+
+for i in range(16):
+
+    nother[:,i,:] = tensor2np(other[:,i].T,1)
+
+    others = nother.reshape(14993, 16 * 64)  #
+
+description_res = tensor2np(des_tensor,4)
+otherlabels_res = others
+np.save("../data/description_res.npy", description_res);
+np.save("../data/otherlabels_res.npy", otherlabels_res);
+
